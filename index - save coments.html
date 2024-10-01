@@ -67,17 +67,8 @@
             text-align: left;
         }
     </style>
-
-    <!-- Updated EmailJS SDK -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function(){
-            emailjs.init("sjWeBWnoVe-4FILZV");  // Initialize with your EmailJS Public API Key
-        })();
-
-        function saveComment(event) {
-            event.preventDefault();  // Prevent default form submission
-
+    <script>
+        function saveComment() {
             // Get the comment from the textarea
             let comment = document.getElementById("userComment").value;
 
@@ -94,21 +85,33 @@
                 return false;
             }
 
-            // Send the comment via EmailJS
-            emailjs.send("service_s9o036f", "template_jfa425c", {
-                message: comment
-            })
-            .then(function(response) {
-                alert("Comment sent successfully!");
-            }, function(error) {
-                alert("Failed to send comment. Error: " + JSON.stringify(error));
-            });
+            // Save the comment to localStorage
+            let existingComments = JSON.parse(localStorage.getItem("comments")) || [];
+            existingComments.push(comment);
+            localStorage.setItem("comments", JSON.stringify(existingComments));
 
             // Clear the textarea
             document.getElementById("userComment").value = "";
+
+            // Display the updated comment list
+            displayComments();
         }
 
-        // Call displayComments() when the page loads to show saved comments (if needed for future updates)
+        function displayComments() {
+            let commentList = document.getElementById("comment-list");
+            commentList.innerHTML = "";  // Clear previous comments
+
+            let comments = JSON.parse(localStorage.getItem("comments")) || [];
+
+            comments.forEach((comment) => {
+                let commentDiv = document.createElement("div");
+                commentDiv.classList.add("comment");
+                commentDiv.textContent = comment;
+                commentList.appendChild(commentDiv);
+            });
+        }
+
+        // Call displayComments() when the page loads
         window.onload = function() {
             displayComments();
         };
@@ -151,11 +154,9 @@
 <!-- Comment Box Section -->
 <div class="comment-section">
     <h3>Leave a Comment (Max 20 words)</h3>
-    <form onsubmit="saveComment(event)">
-        <textarea id="userComment" placeholder="Enter your comment here..."></textarea>
-        <br>
-        <button type="submit">Send Comment</button>
-    </form>
+    <textarea id="userComment" placeholder="Enter your comment here..."></textarea>
+    <br>
+    <button onclick="saveComment()">Save Comment</button>
 </div>
 
 <!-- Display Saved Comments -->
